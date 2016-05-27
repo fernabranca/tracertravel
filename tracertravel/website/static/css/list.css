@@ -1,0 +1,25 @@
+.itemList{
+	margin-top: 5px;
+	padding: 0px;
+}
+
+
+
+.itemList img{
+	width: 100%;
+	height: auto;
+
+} 
+
+.itemList .element{
+	padding-left: 0px;
+}
+
+.itemList .descripcion{
+	float: left;
+
+}
+
+.itemList .reservar{
+	float: right;
+}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}
+Detalle Cancha
+{% endblock title %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ STATIC_URL }}css/detail.css">
+{% endblock head%}
+
+{% block body %}
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&language=es"></script>
+
+<script>
+  var map = null;
+  var directionsDisplay = null;
+  var directionsService = null;
+  navigator.geolocation.getCurrentPosition(
+    function success(pos) {
+      var crd = pos.coords;
+      var mapOptions = {
+        center: new google.maps.LatLng(crd.latitude, crd.longitude),
+        zoom: 13,
+        scrollwheel:false,
+        mapTypeId: google.maps.MapTypeId.ROADMAP};
+
+        var map = new google.maps.Map(document.getElementById("map"),mapOptions);    
+
+        directionsDisplay = new google.maps.DirectionsRenderer();
+        directionsService = new google.maps.DirectionsService();
+
+        var request = {
+          origin: new google.maps.LatLng(crd.latitude, crd.longitude),
+          destination: new google.maps.LatLng({{cancha.complejo.latitud|stringformat:"f" }}, {{cancha.complejo.longitud|stringformat:"f"}}),
+          travelMode: google.maps.TravelMode.DRIVING};
+
+          directionsService.route(request, function(response, status) {
+            directionsDisplay.setMap(map);
+            directionsDisplay.setDirections(response);
+          });
+        });
+      
+    </script>
+<div class="jumbotron center">  
+
+  <div class="row">
+    <div class="col-md-4">
+      <img id="imgCancha" src="{{cancha.imagen.url}}">
+    </div>
+    <div class="col-md-8">
+      <h2><strong>Complejo: </strong> {{cancha.complejo.nombre}}</h2>
+       <h4 class="data"><strong>Deporte:</strong> {{cancha.deporte.nombre}}</h4>
+      <h4 class="data"><strong>Cancha:</strong> {{cancha.numero_cancha}}</h4>
+      <h4 class="data"><strong>Precio:</strong>  ${{cancha.precio_por_turno}}</h4>
+      <h4 class="data"><strong>Dirección:</strong> {{cancha.complejo.direccion}}</h4>
+      <div id="map"></div>
+    </div>
+  </div>
+  <div class="row">
+    <div class='col-sm-4'>
+    </div>
+    <div class='col-sm-6'>
+    <form class="form-horizontal" role="form" action="." method="get">
+
+        <div class="input-group">
+              <input type="date" min="{{fecha_actual}}" class="form-control" name='date' required>
+              <input name="id" type="hidden" value="{{cancha.pk}}">
+              <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit">Ver</button>
+              </span>
+            
+        </div>
+        </form>
+        
+  </div>
+
+  <div class="row">
+    <div class='col-sm-4'>
+    </div>
+    <div class='col-sm-6'>
+          <h2>Turnos Disponibles para {{fecha}}</h2>
+
+          <table class='table table-hover'>
+          <thead>
+            <tr>
+              <th class="text-center">Hora del turno</th>
+              <th class="text-center">Reservar</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for d in disponibles %}  
+            <tr {% if forloop.counter|divisibleby:2 %} class="success" {% endif %}>
+            <form id="form_reserva_{{d}}" role="form" action="/reservar/" method="post">
+              {% csrf_token %}
+              <td class="text-center">{{d}}:00hs</td>
+              
+              <input name="hora" type="hidden" value="{{d}}">
+              <input name="fecha" type="hidden" value="{{fecha}}">
+              <input name="id_cancha" type="hidden" value="{{cancha.pk}}">
+
+              <td class="text-center"><a href="javascript:{}" onclick="document.getElementById('form_reserva_{{d}}').submit(); return false;">Reservar</a></td>
+            </form>
+            </tr>
+          {% endfor %}
+          </tbody>
+      </table>
+  </div>
+
+</div>
+  {% endblock body %}
